@@ -9,7 +9,8 @@ import {
   BookOpen,
   Building2,
   Edit3,
-  Sparkles
+  Sparkles,
+  Printer
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -22,8 +23,8 @@ interface HeaderProps {
   kop: KopSekolah;
   onOpenEditKop: () => void;
   totalCount: number;
-  activeModule: 'pegawai' | 'siswa';
-  onSelectModule: (module: 'pegawai' | 'siswa') => void;
+  activeModule: 'pegawai' | 'siswa' | 'cetak';
+  onSelectModule: (module: 'pegawai' | 'siswa' | 'cetak') => void;
   onOpenGoogleForms: () => void;
   onOpenGoogleSheets: () => void;
   siswaCount: number;
@@ -123,6 +124,21 @@ export const Header: React.FC<HeaderProps> = ({
               }`}>
                 {siswaCount}
               </span>
+            </button>
+
+            <button
+              id="tab-module-cetak"
+              type="button"
+              onClick={() => onSelectModule('cetak')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                activeModule === 'cetak'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
+              }`}
+              title="Pusat Cetak Dokumen Resmi & Kartu Pelajar"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Cetak Dokumen</span>
             </button>
           </div>
 

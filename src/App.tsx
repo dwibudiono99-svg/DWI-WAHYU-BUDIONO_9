@@ -20,6 +20,9 @@ import { SiswaFormModal } from './components/SiswaFormModal';
 import { SiswaFotoModal } from './components/SiswaFotoModal';
 import { GoogleFormsManagerModal } from './components/GoogleFormsManagerModal';
 import { GoogleSheetsManagerModal } from './components/GoogleSheetsManagerModal';
+import { HtmlAddressBar } from './components/HtmlAddressBar';
+import { WebAddressModal } from './components/WebAddressModal';
+import { CetakCenter } from './components/CetakCenter';
 import { Toast } from './components/Toast';
 import {
   exportPegawaiToCSV,
@@ -34,9 +37,36 @@ const STORAGE_KEY = 'SIMPEG_SMAN_DATA_V1';
 const SISWA_STORAGE_KEY = 'SIMPEG_SMAN_SISWA_DATA_V1';
 const KOP_STORAGE_KEY = 'SIMPEG_SMAN_KOP_V1';
 
+// Helper to detect initial module from URL pathname or hash (.html friendly)
+const getInitialModuleFromUrl = (): 'pegawai' | 'siswa' | 'cetak' => {
+  if (typeof window === 'undefined') return 'pegawai';
+  const path = (window.location.pathname + window.location.hash).toLowerCase();
+  if (path.includes('siswa')) return 'siswa';
+  if (path.includes('cetak')) return 'cetak';
+  return 'pegawai';
+};
+
 export default function App() {
-  // Active Module: 'pegawai' or 'siswa'
-  const [activeModule, setActiveModule] = useState<'pegawai' | 'siswa'>('pegawai');
+  // Active Module: 'pegawai' (/index.html) | 'siswa' (/siswa.html) | 'cetak' (/cetak.html)
+  const [activeModule, setActiveModule] = useState<'pegawai' | 'siswa' | 'cetak'>(getInitialModuleFromUrl);
+
+  const handleNavigate = (newModule: 'pegawai' | 'siswa' | 'cetak') => {
+    setActiveModule(newModule);
+    const targetHtml = newModule === 'siswa' ? '/siswa.html' : newModule === 'cetak' ? '/cetak.html' : '/index.html';
+    if (typeof window !== 'undefined' && window.history && window.history.pushState) {
+      window.history.pushState({ module: newModule }, '', targetHtml);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Listen to browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveModule(getInitialModuleFromUrl());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Pegawai State
   const [pegawaiList, setPegawaiList] = useState<Pegawai[]>(() => {
@@ -93,6 +123,9 @@ export default function App() {
 
   // Google Sheets Modal State
   const [isGoogleSheetsModalOpen, setIsGoogleSheetsModalOpen] = useState(false);
+
+  // Web Address List Modal State
+  const [isWebAddressModalOpen, setIsWebAddressModalOpen] = useState(false);
 
   // Toast State
   const [toast, setToast] = useState<ToastMessage | null>(null);
@@ -415,13 +448,10 @@ export default function App() {
       {/* Toast Notification */}
       <Toast toast={toast} onClose={() => setToast(null)} />
 
-      {/* Header with Switcher between Pegawai & Siswa + Google Forms Button */}
+      {/* Header with Switcher between Pegawai, Siswa & Cetak + Google Forms Button */}
       <Header
         activeModule={activeModule}
-        onSelectModule={(mod) => {
-          setActiveModule(mod);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
+        onSelectModule={handleNavigate}
         onOpenGoogleForms={() => setIsGoogleFormsModalOpen(true)}
         onOpenGoogleSheets={() => setIsGoogleSheetsModalOpen(true)}
         siswaCount={siswaList.length}
@@ -444,6 +474,16 @@ export default function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full space-y-6">
+        {/* Simple .html Web Address Bar & Standalone Exporter */}
+        <HtmlAddressBar
+          activeModule={activeModule}
+          onNavigate={handleNavigate}
+          siswaList={siswaList}
+          pegawaiList={pegawaiList}
+          kop={kopSekolah}
+          onOpenWebAddressModal={() => setIsWebAddressModalOpen(true)}
+        />
+
         {/* KOP Surat Resmi SMAN Banner */}
         <KopSekolahBanner
           kop={kopSekolah}
@@ -523,6 +563,19 @@ export default function App() {
               onOpenGoogleSheets={() => setIsGoogleSheetsModalOpen(true)}
             />
           </>
+        )}
+
+        {/* ======================================================== */}
+        {/* MODULE 3: PUSAT CETAK DOKUMEN & KARTU (/cetak.html) */}
+        {/* ======================================================== */}
+        {activeModule === 'cetak' && (
+          <CetakCenter
+            siswaList={siswaList}
+            pegawaiList={pegawaiList}
+            kop={kopSekolah}
+            onViewSiswaDetail={(siswa) => setDetailSiswa(siswa)}
+            onViewPegawaiDetail={(pegawai) => setDetailPegawai(pegawai)}
+          />
         )}
       </main>
 
@@ -643,6 +696,15 @@ export default function App() {
         onShowToast={showToast}
       />
 
+      {/* Modal Daftar Alamat Web (.html) & QR Code */}
+      <WebAddressModal
+        isOpen={isWebAddressModalOpen}
+        onClose={() => setIsWebAddressModalOpen(false)}
+        siswaList={siswaList}
+        pegawaiList={pegawaiList}
+        kop={kopSekolah}
+      />
+
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200/80 py-5 text-center text-xs text-slate-500 mt-auto">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
@@ -650,6 +712,14 @@ export default function App() {
             &copy; 2026 <strong>SIMPEG & KESISWAAN SMAN</strong> — Sistem Informasi Terpadu SMA Negeri
           </p>
           <div className="flex items-center gap-3 text-[11px] text-slate-500">
+            <button
+              type="button"
+              onClick={() => setIsWebAddressModalOpen(true)}
+              className="text-blue-600 hover:text-blue-800 font-bold underline cursor-pointer"
+            >
+              🌐 Alamat Web (.html)
+            </button>
+            <span>&bull;</span>
             <span>Standar Dapodik Kemendikbudristek</span>
             <span>&bull;</span>
             <span>Dinas Pendidikan Provinsi Jawa Timur</span>
