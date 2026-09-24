@@ -1,0 +1,8 @@
+{
+  "name": "Remix SIMPEG SMAN 9 SURABAYA",
+  "description": "Sistem Informasi Kepegawaian, Kesiswaan Lengkap (Dapodik & Pas Foto Dinas), serta Integrasi Google Forms SMA Negeri.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
