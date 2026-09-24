@@ -25,6 +25,7 @@ interface HeaderProps {
   activeModule: 'pegawai' | 'siswa';
   onSelectModule: (module: 'pegawai' | 'siswa') => void;
   onOpenGoogleForms: () => void;
+  onOpenGoogleSheets: () => void;
   siswaCount: number;
 }
 
@@ -41,6 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
   activeModule,
   onSelectModule,
   onOpenGoogleForms,
+  onOpenGoogleSheets,
   siswaCount
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -134,6 +136,18 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Sparkles className="w-3.5 h-3.5 text-purple-200 animate-pulse" />
             <span>Google Forms</span>
+          </button>
+
+          {/* Google Sheets Trigger Button */}
+          <button
+            id="btn-open-google-sheets"
+            type="button"
+            onClick={onOpenGoogleSheets}
+            title="Kelola & Sinkronkan Google Sheets (Buku Induk Siswa & SIMPEG Guru)"
+            className="btn-3d btn-3d-emerald text-emerald-50 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-200" />
+            <span>Google Sheets</span>
           </button>
         </div>
 

@@ -24,6 +24,7 @@ import {
   Award,
   Clock,
   CheckCircle2,
+  FileSpreadsheet,
 } from "lucide-react";
 
 interface PegawaiTableProps {
@@ -37,6 +38,7 @@ interface PegawaiTableProps {
   onManageBerkas: (pegawai: Pegawai) => void;
   onResetAll: () => void;
   onOpenRincianMapel?: () => void;
+  onOpenGoogleSheets?: () => void;
 }
 
 export const PegawaiTable: React.FC<PegawaiTableProps> = ({
@@ -50,6 +52,7 @@ export const PegawaiTable: React.FC<PegawaiTableProps> = ({
   onManageBerkas,
   onResetAll,
   onOpenRincianMapel,
+  onOpenGoogleSheets,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -241,6 +244,18 @@ export const PegawaiTable: React.FC<PegawaiTableProps> = ({
                 <span className="hidden sm:inline">Galeri Foto</span>
               </button>
             </div>
+
+            {onOpenGoogleSheets && (
+              <button
+                type="button"
+                onClick={onOpenGoogleSheets}
+                className="px-3 py-1.5 text-xs font-bold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 rounded-xl flex items-center gap-1.5 shadow-2xs transition-colors"
+                title="Buka Sinkronisasi Google Sheets & SIMPEG Guru"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="hidden sm:inline">Google Sheets</span>
+              </button>
+            )}
 
             {/* Search bar */}
             <div className="relative w-full md:w-64">

@@ -19,6 +19,7 @@ import { SiswaDetailModal } from './components/SiswaDetailModal';
 import { SiswaFormModal } from './components/SiswaFormModal';
 import { SiswaFotoModal } from './components/SiswaFotoModal';
 import { GoogleFormsManagerModal } from './components/GoogleFormsManagerModal';
+import { GoogleSheetsManagerModal } from './components/GoogleSheetsManagerModal';
 import { Toast } from './components/Toast';
 import {
   exportPegawaiToCSV,
@@ -89,6 +90,9 @@ export default function App() {
 
   // Google Forms Modal State
   const [isGoogleFormsModalOpen, setIsGoogleFormsModalOpen] = useState(false);
+
+  // Google Sheets Modal State
+  const [isGoogleSheetsModalOpen, setIsGoogleSheetsModalOpen] = useState(false);
 
   // Toast State
   const [toast, setToast] = useState<ToastMessage | null>(null);
@@ -380,6 +384,19 @@ export default function App() {
     setActiveModule('siswa');
   };
 
+  const handleImportSiswaFromGoogleSheets = (newSiswaList: Siswa[]) => {
+    setSiswaList((prev) => {
+      const existingNisns = new Set(prev.map((s) => s.nisn.trim()));
+      const uniqueNew = newSiswaList.filter((s) => !existingNisns.has(s.nisn.trim()));
+      return [...uniqueNew, ...prev];
+    });
+    showToast(
+      'Sinkronisasi Google Sheets Berhasil',
+      `Berhasil mengimpor ${newSiswaList.length} data siswa dari spreadsheet ke database sekolah!`
+    );
+    setActiveModule('siswa');
+  };
+
   // Derive Wali Kelas options from Guru in pegawaiList
   const guruNames = pegawaiList
     .filter((p) => p.jenisPtk.toLowerCase().includes('guru') || p.nama.includes('S.Pd'))
@@ -406,6 +423,7 @@ export default function App() {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         onOpenGoogleForms={() => setIsGoogleFormsModalOpen(true)}
+        onOpenGoogleSheets={() => setIsGoogleSheetsModalOpen(true)}
         siswaCount={siswaList.length}
         totalCount={pegawaiList.length}
         kop={kopSekolah}
@@ -471,6 +489,7 @@ export default function App() {
               onManageBerkas={(pegawai) => setBerkasPegawaiModal(pegawai)}
               onResetAll={handleResetAllPegawai}
               onOpenRincianMapel={() => setIsRincianMapelOpen(true)}
+              onOpenGoogleSheets={() => setIsGoogleSheetsModalOpen(true)}
             />
           </>
         )}
@@ -501,6 +520,7 @@ export default function App() {
               onImport={handleImportSiswa}
               onDownloadTemplate={downloadTemplateSiswaCSV}
               onResetAll={handleResetAllSiswa}
+              onOpenGoogleSheets={() => setIsGoogleSheetsModalOpen(true)}
             />
           </>
         )}
@@ -570,6 +590,16 @@ export default function App() {
         onImportSiswa={handleImportSiswaFromGoogleForms}
         kop={kopSekolah}
         existingSiswaCount={siswaList.length}
+      />
+
+      {/* Google Sheets Integration Modal */}
+      <GoogleSheetsManagerModal
+        isOpen={isGoogleSheetsModalOpen}
+        onClose={() => setIsGoogleSheetsModalOpen(false)}
+        pegawaiList={pegawaiList}
+        siswaList={siswaList}
+        kop={kopSekolah}
+        onImportSiswaFromSheets={handleImportSiswaFromGoogleSheets}
       />
 
       {/* Modal Edit KOP Sekolah */}

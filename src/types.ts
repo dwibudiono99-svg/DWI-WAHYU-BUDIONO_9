@@ -255,4 +255,44 @@ export interface GoogleFormSubmission {
   answers?: Record<string, GoogleFormResponseAnswer>;
 }
 
+// ==========================================
+// GOOGLE SHEETS INTEGRATION TYPES
+// ==========================================
+
+export interface GoogleSheetItem {
+  id: string;
+  name: string;
+  webViewLink?: string;
+  createdTime?: string;
+  modifiedTime?: string;
+  size?: string;
+}
+
+export interface GoogleSheetTab {
+  sheetId: number;
+  title: string;
+  index: number;
+  rowCount?: number;
+  columnCount?: number;
+}
+
+export interface GoogleSpreadsheetDetail {
+  spreadsheetId: string;
+  title: string;
+  spreadsheetUrl: string;
+  sheets: GoogleSheetTab[];
+}
+
+export interface SyncHistoryEntry {
+  id: string;
+  timestamp: string;
+  type: 'export_pegawai' | 'export_siswa' | 'import_pegawai' | 'import_siswa' | 'create_sheet';
+  spreadsheetId: string;
+  spreadsheetTitle: string;
+  rowCount: number;
+  status: 'success' | 'error';
+  details?: string;
+}
+
+
 

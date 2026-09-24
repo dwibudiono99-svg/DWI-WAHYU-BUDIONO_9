@@ -97,7 +97,7 @@ export const KopSekolahBanner: React.FC<KopSekolahBannerProps> = ({
         className={`p-4 sm:p-6 transition-all duration-200 ${isExpanded ? "block" : "hidden print:block"}`}
       >
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-          {/* Logo Kiri (Tut Wuri Handayani / Pemda) */}
+          {/* Logo Kiri (Tut Wuri Handayani / PEMPROV) */}
           <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 flex items-center justify-center p-1 bg-slate-50 border border-slate-100 rounded-xl">
             {kop.logoKiri ? (
               <img

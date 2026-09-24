@@ -13,13 +13,16 @@ import firebaseConfig from '../../firebase-applet-config.json';
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 
-// Provider with required Google Forms and Drive scopes
+// Provider with required Google Sheets, Forms, and Drive scopes
 const provider = new GoogleAuthProvider();
+provider.addScope('https://www.googleapis.com/auth/spreadsheets');
+provider.addScope('https://www.googleapis.com/auth/spreadsheets.readonly');
+provider.addScope('https://www.googleapis.com/auth/drive');
+provider.addScope('https://www.googleapis.com/auth/drive.file');
+provider.addScope('https://www.googleapis.com/auth/drive.readonly');
 provider.addScope('https://www.googleapis.com/auth/forms.body');
 provider.addScope('https://www.googleapis.com/auth/forms.body.readonly');
 provider.addScope('https://www.googleapis.com/auth/forms.responses.readonly');
-provider.addScope('https://www.googleapis.com/auth/drive.file');
-provider.addScope('https://www.googleapis.com/auth/drive.readonly');
 
 // In-memory token cache (Do NOT store in localStorage or sessionStorage per skill guidelines)
 let cachedAccessToken: string | null = null;

@@ -33,6 +33,7 @@ interface SiswaTableProps {
   onImport: (file: File) => void;
   onDownloadTemplate: () => void;
   onResetAll: () => void;
+  onOpenGoogleSheets?: () => void;
 }
 
 export const SiswaTable: React.FC<SiswaTableProps> = ({
@@ -47,7 +48,8 @@ export const SiswaTable: React.FC<SiswaTableProps> = ({
   onExport,
   onImport,
   onDownloadTemplate,
-  onResetAll
+  onResetAll,
+  onOpenGoogleSheets
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterKelas, setFilterKelas] = useState('ALL');
@@ -125,6 +127,19 @@ export const SiswaTable: React.FC<SiswaTableProps> = ({
             <Plus className="w-3.5 h-3.5" />
             <span>Tambah Siswa Baru</span>
           </button>
+
+          {onOpenGoogleSheets && (
+            <button
+              id="btn-sheets-siswa"
+              type="button"
+              onClick={onOpenGoogleSheets}
+              className="px-3 py-2 text-xs font-bold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 rounded-lg flex items-center gap-1.5 shadow-2xs transition-colors"
+              title="Buka Sinkronisasi Google Sheets & Buku Induk"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Google Sheets</span>
+            </button>
+          )}
 
           <button
             id="btn-export-siswa"

@@ -1,5 +1,20 @@
 import { Siswa } from '../types';
 
+// Helper to calculate official background color according to East Java Education Department standard:
+// Odd Birth Year -> Red background, Even Birth Year -> Blue background
+export const getOfficialDinasPhotoBgColor = (
+  birthDateOrYear: string | number
+): 'Merah (Tahun Lahir Ganjil)' | 'Biru (Tahun Lahir Genap)' => {
+  let year: number;
+  if (typeof birthDateOrYear === 'number') {
+    year = birthDateOrYear;
+  } else {
+    const parsed = parseInt(String(birthDateOrYear).substring(0, 4), 10);
+    year = isNaN(parsed) ? 2008 : parsed;
+  }
+  return year % 2 !== 0 ? 'Merah (Tahun Lahir Ganjil)' : 'Biru (Tahun Lahir Genap)';
+};
+
 // Helper to create official Dinas Pendidikan student photo SVG (Merah / Biru)
 export const createOfficialSiswaPhoto = (
   bgColor: 'red' | 'blue',
