@@ -47,7 +47,7 @@ export const WebAddressModal: React.FC<WebAddressModalProps> = ({
   // The permanent canonical public URL for this application
   const defaultPublicBase = 'https://ais-pre-tftziqlbcz2tjreqoa56ut-302703941788.asia-southeast1.run.app';
   const currentOrigin =
-    typeof window !== 'undefined' && !window.location.origin.includes('localhost') && !window.location.origin.includes('ais-dev')
+    typeof window !== 'undefined' && window.location.origin && !window.location.origin.includes('localhost')
       ? window.location.origin
       : defaultPublicBase;
 
@@ -56,7 +56,7 @@ export const WebAddressModal: React.FC<WebAddressModalProps> = ({
       id: 'index',
       name: 'Beranda & SIMPEG Guru Utama',
       filename: 'index.html',
-      shortUrl: 'https://tinyurl.com/2aopslr4',
+      shortUrl: 'https://tinyurl.com/254n3d2p',
       fullUrl: `${currentOrigin}/index.html`,
       desc: 'Halaman dashboard utama, data PTK ASN/PPPK/GTT/PTT, jam mengajar (JJM), dan data keluarga.',
       icon: Users,
@@ -66,7 +66,7 @@ export const WebAddressModal: React.FC<WebAddressModalProps> = ({
       id: 'siswa',
       name: 'Buku Induk Siswa (Dapodik)',
       filename: 'siswa.html',
-      shortUrl: 'https://tinyurl.com/siswa-sman9-surabaya',
+      shortUrl: 'https://tinyurl.com/2444tpds',
       fullUrl: `${currentOrigin}/siswa.html`,
       desc: 'Halaman data kesiswaan lengkap dengan verifikasi aturan warna pas foto dinas (merah/biru).',
       icon: GraduationCap,
@@ -76,7 +76,7 @@ export const WebAddressModal: React.FC<WebAddressModalProps> = ({
       id: 'pegawai',
       name: 'Daftar Urut Kepegawaian (DUK)',
       filename: 'pegawai.html',
-      shortUrl: 'https://tinyurl.com/pegawai-sman9-sby',
+      shortUrl: 'https://tinyurl.com/25caxeld',
       fullUrl: `${currentOrigin}/pegawai.html`,
       desc: 'Daftar urut kepangkatan, NIP, NUPTK, sertifikasi pendidik, dan arsip berkas PTK.',
       icon: FileCode,
@@ -86,7 +86,7 @@ export const WebAddressModal: React.FC<WebAddressModalProps> = ({
       id: 'cetak',
       name: 'Pusat Cetak Dokumen & Kartu',
       filename: 'cetak.html',
-      shortUrl: 'https://tinyurl.com/cetak-sman9-sby',
+      shortUrl: 'https://tinyurl.com/29eyst4m',
       fullUrl: `${currentOrigin}/cetak.html`,
       desc: 'Format cetak resmi A4/Folio untuk Kartu Pelajar, KTA Pegawai, dan Buku Induk.',
       icon: Printer,
@@ -142,18 +142,32 @@ export const WebAddressModal: React.FC<WebAddressModalProps> = ({
 
         {/* Content */}
         <div className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
-          {/* AI Studio Explanation Callout */}
-          <div className="bg-blue-50 border border-blue-200/90 rounded-2xl p-4 text-xs text-blue-900 flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+          {/* AI Studio Explanation & Troubleshooting Callout */}
+          <div className="bg-amber-50 border border-amber-200/90 rounded-2xl p-4 text-xs text-amber-900 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 mt-0.5">
               <Info className="w-4 h-4" />
             </div>
-            <div className="space-y-1">
-              <div className="font-bold text-sm text-blue-950">
-                Perbedaan Alamat AI Studio vs Alamat Web Resmi
+            <div className="space-y-1.5 flex-1">
+              <div className="font-bold text-sm text-amber-950 flex items-center justify-between">
+                <span>Catatan Penting Keamanan Akses Web (Google Cloud)</span>
+                <span className="text-[10px] bg-amber-200/60 text-amber-900 font-bold px-2 py-0.5 rounded-full">
+                  Panduan Akses
+                </span>
               </div>
-              <p className="text-blue-800 leading-relaxed">
-                Tautan <code>aistudio.google.com/apps/668038c5...</code> adalah tautan <strong>editor pengembang</strong>. Agar aplikasi dapat dibuka oleh guru, staf, maupun siswa sebagai <strong>situs web resmi yang bersih tanpa tampilan editor</strong>, gunakan alamat web sederhana ber-ekstensi <code>.html</code> di bawah ini:
+              <p className="text-amber-900 leading-relaxed">
+                Tautan <code>ais-pre-...run.app</code> diproteksi oleh sistem keamanan Google AI Studio. Jika saat dibuka muncul layar <em>"Action required to load your app"</em> atau <em>"Cookie check"</em>, silakan:
               </p>
+              <ul className="list-disc pl-4 space-y-1 text-amber-800">
+                <li>
+                  <strong>Klik tombol biru &quot;Authenticate in new window&quot;</strong> yang muncul di layar tersebut untuk mengizinkan cookie keamanan Google.
+                </li>
+                <li>
+                  Atau buka langsung melalui link resmi AI Studio: <strong><a href="https://aistudio.google.com/apps/668038c5-8c08-4f19-b1fc-327d2cfefa4c?showPreview=true" target="_blank" rel="noreferrer" className="underline font-bold text-blue-700">Buka AI Studio Preview</a></strong> lalu klik tombol <em>&quot;Open in new tab&quot;</em> di kanan atas.
+                </li>
+                <li>
+                  Atau <strong>Unduh Berkas HTML Mandiri</strong> di bawah ini yang 100% bisa dibuka offline di komputer mana saja tanpa perlu login Google.
+                </li>
+              </ul>
             </div>
           </div>
 

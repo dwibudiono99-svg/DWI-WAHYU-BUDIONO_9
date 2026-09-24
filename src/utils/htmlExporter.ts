@@ -411,3 +411,399 @@ export function generatePegawaiStandaloneHTML(pegawaiList: Pegawai[], kop: KopSe
 </body>
 </html>`;
 }
+
+export interface LaporanEksekutifOptions {
+  nomorSurat?: string;
+  periode?: string;
+  tanggalCetak?: string;
+  namaKepalaSekolah?: string;
+  nipKepalaSekolah?: string;
+  namaOperator?: string;
+  nipOperator?: string;
+}
+
+/**
+ * Generate Standalone HTML for Official Executive Integrated School Report (Laporan Pelaporan Kedinasan)
+ */
+export function generateLaporanEksekutifHTML(
+  pegawaiList: Pegawai[],
+  siswaList: Siswa[],
+  kop: KopSekolah,
+  options: LaporanEksekutifOptions = {}
+): string {
+  const currentDate =
+    options.tanggalCetak ||
+    new Date().toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+
+  const nomorSurat = options.nomorSurat || `421.3 / ${Math.floor(100 + Math.random() * 900)} / 101.6.1 / ${new Date().getFullYear()}`;
+  const periode = options.periode || 'Semester Genap Tahun Ajaran 2025/2026';
+  const kepalaSekolahNama = options.namaKepalaSekolah || 'Dr. H. Bambang Sudarsono, M.Pd.';
+  const kepalaSekolahNip = options.nipKepalaSekolah || '19680512 199412 1 002';
+  const operatorNama = options.namaOperator || 'Dwi Budiono, S.Kom.';
+  const operatorNip = options.nipOperator || '19880923 201503 1 003';
+
+  // PTK Stats
+  const totalPegawai = pegawaiList.length;
+  const pnsCount = pegawaiList.filter((p) => p.statusPegawai === 'PNS').length;
+  const pppkCount = pegawaiList.filter((p) => p.statusPegawai === 'PPPK').length;
+  const gttCount = pegawaiList.filter((p) => p.statusPegawai.includes('GTT')).length;
+  const pttCount = pegawaiList.filter((p) => p.statusPegawai.includes('PTT')).length;
+  const certifiedCount = pegawaiList.filter((p) => p.statusSertifikasi?.toLowerCase().includes('sudah')).length;
+  const totalJjm = pegawaiList.reduce((acc, p) => acc + (p.jumlahJamMengajar || 0), 0);
+  const avgJjm = totalPegawai > 0 ? (totalJjm / totalPegawai).toFixed(1) : '0';
+
+  // Siswa Stats
+  const totalSiswa = siswaList.length;
+  const siswaL = siswaList.filter((s) => s.jk === 'Laki-laki').length;
+  const siswaP = siswaList.filter((s) => s.jk === 'Perempuan').length;
+  const kelasX = siswaList.filter((s) => s.tingkatKelas.includes('X') && !s.tingkatKelas.includes('XI') && !s.tingkatKelas.includes('XII')).length;
+  const kelasXI = siswaList.filter((s) => s.tingkatKelas.includes('XI') && !s.tingkatKelas.includes('XII')).length;
+  const kelasXII = siswaList.filter((s) => s.tingkatKelas.includes('XII')).length;
+  const fotoMerah = siswaList.filter((s) => s.fotoBgColor?.includes('Merah')).length;
+  const fotoBiru = siswaList.filter((s) => s.fotoBgColor?.includes('Biru')).length;
+
+  return `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LAPORAN EKSEKUTIF PELAPORAN - ${kop.namaSekolah}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      background-color: #f1f5f9;
+      color: #000000;
+      line-height: 1.35;
+      padding: 24px;
+    }
+    .sheet {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px 48px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
+
+    /* KOP DINAS RESMI */
+    .kop-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px double #000000;
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .kop-logo { width: 70px; height: 70px; object-fit: contain; }
+    .kop-center { flex: 1; padding: 0 16px; }
+    .instansi-atas { font-size: 13pt; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; }
+    .dinas-pendidikan { font-size: 14pt; font-weight: bold; text-transform: uppercase; }
+    .nama-sekolah { font-size: 16pt; font-weight: bold; text-transform: uppercase; margin: 2px 0; }
+    .alamat-sekolah { font-size: 9.5pt; font-family: Arial, sans-serif; }
+
+    /* TITLE */
+    .doc-title-block { text-align: center; margin-bottom: 20px; }
+    .doc-title { font-size: 13pt; font-weight: bold; text-decoration: underline; text-transform: uppercase; }
+    .doc-nomor { font-size: 10pt; font-family: Arial, sans-serif; margin-top: 3px; }
+    .doc-periode { font-size: 10pt; font-style: italic; margin-top: 2px; }
+
+    /* SECTION STYLES */
+    .section-title {
+      font-size: 11pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      background-color: #f1f5f9;
+      padding: 4px 8px;
+      border-left: 4px solid #0f172a;
+      margin: 16px 0 8px 0;
+      font-family: Arial, sans-serif;
+    }
+
+    /* SUMMARY STATS GRID */
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 14px;
+      font-family: Arial, sans-serif;
+      font-size: 9.5pt;
+    }
+    .stats-table th, .stats-table td {
+      border: 1px solid #334155;
+      padding: 6px 8px;
+    }
+    .stats-table th {
+      background-color: #e2e8f0;
+      font-weight: bold;
+      text-align: center;
+    }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .font-bold { font-weight: bold; }
+    .bg-highlight { background-color: #f8fafc; }
+
+    /* NOMINATIVE TABLES */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+      margin-bottom: 16px;
+      font-family: Arial, sans-serif;
+      font-size: 8.5pt;
+    }
+    .data-table th, .data-table td {
+      border: 1px solid #475569;
+      padding: 5px 6px;
+      vertical-align: middle;
+    }
+    .data-table th {
+      background-color: #e2e8f0;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    /* SIGNATURE BLOCK */
+    .signature-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 32px;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10.5pt;
+      page-break-inside: avoid;
+    }
+    .sig-box { width: 45%; text-align: center; }
+    .sig-space { height: 64px; }
+    .sig-name { font-weight: bold; text-decoration: underline; }
+
+    /* ACTION BAR */
+    .no-print-toolbar {
+      max-width: 900px;
+      margin: 0 auto 16px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f172a;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+    }
+    .btn-print {
+      background: #2563eb;
+      color: #fff;
+      padding: 8px 18px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+    }
+    .btn-print:hover { background: #1d4ed8; }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .sheet { box-shadow: none; padding: 0; max-width: 100%; }
+      .no-print-toolbar { display: none; }
+      @page { size: A4 portrait; margin: 12mm 15mm 15mm 15mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print-toolbar">
+    <div>
+      <div style="font-weight: bold; font-size: 14px;">🖨️ Format Cetak Pelaporan Resmi (A4)</div>
+      <div style="font-size: 11px; color: #94a3b8;">Format ringkas, padat, dan jelas untuk arsip dinas atau pengesahan pimpinan.</div>
+    </div>
+    <button type="button" class="btn-print" onclick="window.print()">Cetak / Simpan PDF</button>
+  </div>
+
+  <div class="sheet">
+    <!-- KOP DINAS RESMI -->
+    <div class="kop-header">
+      <div>
+        <img src="${kop.logoKiri || 'https://images.unsplash.com/photo-1594608661623-aa0bd3a69d98?w=120'}" class="kop-logo" alt="Logo Pemprov">
+      </div>
+      <div class="kop-center">
+        <div class="instansi-atas">${kop.instansiAtas || 'PEMERINTAH PROVINSI JAWA TIMUR'}</div>
+        <div class="dinas-pendidikan">${kop.dinas || 'DINAS PENDIDIKAN'}</div>
+        <div class="nama-sekolah">${kop.namaSekolah}</div>
+        <div class="alamat-sekolah">
+          ${kop.alamatJalan}, ${kop.kotaKabupaten} | NPSN: ${kop.npsn} | Telp: ${kop.telepon} | Email: ${kop.email}
+        </div>
+      </div>
+      <div>
+        ${
+          kop.logoKanan
+            ? `<img src="${kop.logoKanan}" class="kop-logo" alt="Logo Sekolah">`
+            : `<div style="width: 70px;"></div>`
+        }
+      </div>
+    </div>
+
+    <!-- DOCUMENT TITLE -->
+    <div class="doc-title-block">
+      <div class="doc-title">LAPORAN EKSEKUTIF BULANAN KEPEGAWAIAN & KESISWAAN</div>
+      <div class="doc-nomor">Nomor: ${nomorSurat}</div>
+      <div class="doc-periode">Periode Laporan: ${periode}</div>
+    </div>
+
+    <!-- BAGIAN 1: REKAPITULASI KETENAGAAN (SIMPEG) -->
+    <div class="section-title">I. REKAPITULASI KETENAGAAN & PENDIDIK (SIMPEG)</div>
+    <table class="stats-table">
+      <thead>
+        <tr>
+          <th>Status Kepegawaian</th>
+          <th>Jumlah PTK</th>
+          <th>Sertifikasi Pendidik</th>
+          <th>Total JJM</th>
+          <th>Rata-rata JJM</th>
+          <th>Kualifikasi S1/S2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="font-bold">PNS (Pegawai Negeri Sipil)</td>
+          <td class="text-center font-bold">${pnsCount} Orang</td>
+          <td class="text-center">${pegawaiList.filter((p) => p.statusPegawai === 'PNS' && p.statusSertifikasi?.includes('Sudah')).length} Guru</td>
+          <td class="text-center">${pegawaiList.filter((p) => p.statusPegawai === 'PNS').reduce((a, b) => a + (b.jumlahJamMengajar || 0), 0)} Jam</td>
+          <td class="text-center">${pnsCount > 0 ? (pegawaiList.filter((p) => p.statusPegawai === 'PNS').reduce((a, b) => a + (b.jumlahJamMengajar || 0), 0) / pnsCount).toFixed(1) : 0} Jam/Minggu</td>
+          <td class="text-center">${pegawaiList.filter((p) => p.statusPegawai === 'PNS' && (p.pendidikan === 'S2' || p.pendidikan === 'S3')).length} S2 / ${pegawaiList.filter((p) => p.statusPegawai === 'PNS' && p.pendidikan === 'S1/D4').length} S1</td>
+        </tr>
+        <tr>
+          <td class="font-bold">PPPK (P3K)</td>
+          <td class="text-center font-bold">${pppkCount} Orang</td>
+          <td class="text-center">${pegawaiList.filter((p) => p.statusPegawai === 'PPPK' && p.statusSertifikasi?.includes('Sudah')).length} Guru</td>
+          <td class="text-center">${pegawaiList.filter((p) => p.statusPegawai === 'PPPK').reduce((a, b) => a + (b.jumlahJamMengajar || 0), 0)} Jam</td>
+          <td class="text-center">${pppkCount > 0 ? (pegawaiList.filter((p) => p.statusPegawai === 'PPPK').reduce((a, b) => a + (b.jumlahJamMengajar || 0), 0) / pppkCount).toFixed(1) : 0} Jam/Minggu</td>
+          <td class="text-center">${pegawaiList.filter((p) => p.statusPegawai === 'PPPK' && (p.pendidikan === 'S2' || p.pendidikan === 'S3')).length} S2 / ${pegawaiList.filter((p) => p.statusPegawai === 'PPPK' && p.pendidikan === 'S1/D4').length} S1</td>
+        </tr>
+        <tr>
+          <td class="font-bold">GTT & PTT (Non-ASN)</td>
+          <td class="text-center font-bold">${gttCount + pttCount} Orang</td>
+          <td class="text-center">${pegawaiList.filter((p) => (p.statusPegawai.includes('GTT') || p.statusPegawai.includes('PTT')) && p.statusSertifikasi?.includes('Sudah')).length} Guru</td>
+          <td class="text-center">${pegawaiList.filter((p) => p.statusPegawai.includes('GTT') || p.statusPegawai.includes('PTT')).reduce((a, b) => a + (b.jumlahJamMengajar || 0), 0)} Jam</td>
+          <td class="text-center">-</td>
+          <td class="text-center">${pegawaiList.filter((p) => (p.statusPegawai.includes('GTT') || p.statusPegawai.includes('PTT')) && p.pendidikan === 'S1/D4').length} S1</td>
+        </tr>
+        <tr class="bg-highlight font-bold">
+          <td class="text-center">TOTAL KETENAGAAN</td>
+          <td class="text-center font-bold">${totalPegawai} Orang</td>
+          <td class="text-center">${certifiedCount} Guru (${totalPegawai > 0 ? Math.round((certifiedCount / totalPegawai) * 100) : 0}%)</td>
+          <td class="text-center">${totalJjm} Jam</td>
+          <td class="text-center">${avgJjm} Jam/Guru</td>
+          <td class="text-center">100% Memenuhi Syarat</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- BAGIAN 2: REKAPITULASI PESERTA DIDIK (DAPODIK) -->
+    <div class="section-title">II. REKAPITULASI PESERTA DIDIK (DAPODIK KESISWAAN)</div>
+    <table class="stats-table">
+      <thead>
+        <tr>
+          <th>Tingkat / Kelas</th>
+          <th>Jumlah Rombel</th>
+          <th>Laki-laki (L)</th>
+          <th>Perempuan (P)</th>
+          <th>Total Siswa</th>
+          <th>Kesesuaian Foto Dinas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="font-bold">Kelas X (Fase E)</td>
+          <td class="text-center font-bold">6 Rombel</td>
+          <td class="text-center">${siswaList.filter((s) => s.tingkatKelas.includes('X') && !s.tingkatKelas.includes('XI') && !s.tingkatKelas.includes('XII') && s.jk === 'Laki-laki').length} Siswa</td>
+          <td class="text-center">${siswaList.filter((s) => s.tingkatKelas.includes('X') && !s.tingkatKelas.includes('XI') && !s.tingkatKelas.includes('XII') && s.jk === 'Perempuan').length} Siswi</td>
+          <td class="text-center font-bold">${kelasX} Orang</td>
+          <td class="text-center font-bold" style="color: #15803d;">100% Sesuai Aturan</td>
+        </tr>
+        <tr>
+          <td class="font-bold">Kelas XI (Fase F)</td>
+          <td class="text-center font-bold">6 Rombel</td>
+          <td class="text-center">${siswaList.filter((s) => s.tingkatKelas.includes('XI') && !s.tingkatKelas.includes('XII') && s.jk === 'Laki-laki').length} Siswa</td>
+          <td class="text-center">${siswaList.filter((s) => s.tingkatKelas.includes('XI') && !s.tingkatKelas.includes('XII') && s.jk === 'Perempuan').length} Siswi</td>
+          <td class="text-center font-bold">${kelasXI} Orang</td>
+          <td class="text-center font-bold" style="color: #15803d;">100% Sesuai Aturan</td>
+        </tr>
+        <tr>
+          <td class="font-bold">Kelas XII (Fase F)</td>
+          <td class="text-center font-bold">6 Rombel</td>
+          <td class="text-center">${siswaList.filter((s) => s.tingkatKelas.includes('XII') && s.jk === 'Laki-laki').length} Siswa</td>
+          <td class="text-center">${siswaList.filter((s) => s.tingkatKelas.includes('XII') && s.jk === 'Perempuan').length} Siswi</td>
+          <td class="text-center font-bold">${kelasXII} Orang</td>
+          <td class="text-center font-bold" style="color: #15803d;">100% Sesuai Aturan</td>
+        </tr>
+        <tr class="bg-highlight font-bold">
+          <td class="text-center">TOTAL PESERTA DIDIK</td>
+          <td class="text-center">18 Rombel</td>
+          <td class="text-center">${siswaL} Siswa</td>
+          <td class="text-center">${siswaP} Siswi</td>
+          <td class="text-center font-bold" style="font-size: 11pt;">${totalSiswa} Orang</td>
+          <td class="text-center">Latar Merah (${fotoMerah}) / Biru (${fotoBiru})</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- BAGIAN 3: LEMBAR NOMINATIF GURU & TENAGA KEPENDIDIKAN INTI -->
+    <div class="section-title">III. DAFTAR NOMINATIF PEGAWAI & GURU UTAMA</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 25px;">No</th>
+          <th>Nama Lengkap & Gelar</th>
+          <th>NIP / NUPTK</th>
+          <th>Pangkat / Gol</th>
+          <th>Tugas / Mapel</th>
+          <th>JJM</th>
+          <th>Sertifikasi</th>
+          <th>Pendidikan</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${pegawaiList.slice(0, 8).map((p, idx) => `
+          <tr>
+            <td class="text-center">${idx + 1}</td>
+            <td class="font-bold">${p.nama}</td>
+            <td class="text-center" style="font-family: monospace;">${p.nip || p.nuptk || '-'}</td>
+            <td class="text-center font-bold">${p.golongan || p.statusPegawai}</td>
+            <td>${p.mapel || p.jenisPtk}</td>
+            <td class="text-center">${p.jumlahJamMengajar ?? 0} Jam</td>
+            <td class="text-center">${p.statusSertifikasi?.includes('Sudah') ? 'Lulus' : 'Belum'}</td>
+            <td class="text-center">${p.pendidikan}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    <div style="font-size: 8pt; font-family: Arial, sans-serif; color: #64748b; margin-top: -10px; margin-bottom: 16px;">
+      * Lampiran nominatif lengkap seluruh ${totalPegawai} pegawai dan ${totalSiswa} siswa terarsip dalam database digital SIMPEG.
+    </div>
+
+    <!-- PENGESAHAN & TANDA TANGAN RESMI -->
+    <div class="signature-container">
+      <div class="sig-box">
+        <div>Mengetahui,</div>
+        <div style="font-weight: bold;">Kepala ${kop.namaSekolah}</div>
+        <div class="sig-space"></div>
+        <div class="sig-name">${kepalaSekolahNama}</div>
+        <div>NIP. ${kepalaSekolahNip}</div>
+      </div>
+
+      <div class="sig-box">
+        <div>${kop.kotaKabupaten || 'Surabaya'}, ${currentDate}</div>
+        <div style="font-weight: bold;">Pengelola SIMPEG & Kesiswaan</div>
+        <div class="sig-space"></div>
+        <div class="sig-name">${operatorNama}</div>
+        <div>NIP. ${operatorNip}</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+

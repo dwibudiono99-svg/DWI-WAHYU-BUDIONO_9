@@ -42,7 +42,7 @@ export const HtmlAddressBar: React.FC<HtmlAddressBarProps> = ({
   // Derive current baseUrl (fallback to public canonical if on dev/localhost)
   const defaultPublicBase = 'https://ais-pre-tftziqlbcz2tjreqoa56ut-302703941788.asia-southeast1.run.app';
   const currentOrigin =
-    typeof window !== 'undefined' && !window.location.origin.includes('localhost') && !window.location.origin.includes('ais-dev')
+    typeof window !== 'undefined' && window.location.origin && !window.location.origin.includes('localhost')
       ? window.location.origin
       : defaultPublicBase;
 
@@ -50,12 +50,12 @@ export const HtmlAddressBar: React.FC<HtmlAddressBarProps> = ({
   const fullAddress = `${currentOrigin}${currentPath}`;
 
   const shortUrls: Record<string, string> = {
-    '/index.html': 'https://tinyurl.com/2aopslr4',
-    '/siswa.html': 'https://tinyurl.com/siswa-sman9-surabaya',
-    '/pegawai.html': 'https://tinyurl.com/pegawai-sman9-sby',
-    '/cetak.html': 'https://tinyurl.com/cetak-sman9-sby',
+    '/index.html': 'https://tinyurl.com/254n3d2p',
+    '/siswa.html': 'https://tinyurl.com/2444tpds',
+    '/pegawai.html': 'https://tinyurl.com/25caxeld',
+    '/cetak.html': 'https://tinyurl.com/29eyst4m',
   };
-  const activeShortUrl = shortUrls[currentPath] || 'https://tinyurl.com/2aopslr4';
+  const activeShortUrl = shortUrls[currentPath] || 'https://tinyurl.com/254n3d2p';
 
   const handleCopy = (textToCopy: string) => {
     navigator.clipboard.writeText(textToCopy);
@@ -105,11 +105,11 @@ export const HtmlAddressBar: React.FC<HtmlAddressBarProps> = ({
 
         <div className="flex items-center gap-2">
           <a
-            href={activeShortUrl}
+            href={fullAddress}
             target="_blank"
             rel="noopener noreferrer"
             className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center gap-1.5 shadow-xs transition-all"
-            title="Buka Halaman Web Bersih di Tab Baru (Tanpa Editor AI Studio)"
+            title="Buka Halaman Web Bersih di Tab Baru (Menggunakan Origin Aktif)"
           >
             <ExternalLink className="w-3 h-3" />
             <span>Buka Web Bersih</span>

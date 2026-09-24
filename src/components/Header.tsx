@@ -135,10 +135,13 @@ export const Header: React.FC<HeaderProps> = ({
                   ? 'bg-indigo-600 text-white shadow-xs'
                   : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
               }`}
-              title="Pusat Cetak Dokumen Resmi & Kartu Pelajar"
+              title="Pusat Cetak Dokumen Pelaporan Resmi & Kartu Pelajar"
             >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Cetak Dokumen</span>
+              <Printer className="w-3.5 h-3.5 text-amber-300" />
+              <span>Cetak Pelaporan</span>
+              <span className="text-[9px] bg-amber-400/20 text-amber-300 font-black px-1.5 py-0.2 rounded">
+                A4
+              </span>
             </button>
           </div>
 

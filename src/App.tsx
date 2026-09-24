@@ -24,6 +24,7 @@ import { HtmlAddressBar } from './components/HtmlAddressBar';
 import { WebAddressModal } from './components/WebAddressModal';
 import { CetakCenter } from './components/CetakCenter';
 import { Toast } from './components/Toast';
+import { Printer } from 'lucide-react';
 import {
   exportPegawaiToCSV,
   parsePegawaiCSV,
@@ -490,6 +491,39 @@ export default function App() {
           onOpenEditKop={() => setIsKopModalOpen(true)}
           totalPegawai={pegawaiList.length}
         />
+
+        {/* Quick Reporting Callout Banner (Screen Only) */}
+        {activeModule === 'pegawai' && (
+          <div className="no-print bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-900 rounded-2xl p-4 sm:p-5 text-white shadow-md border border-blue-800/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 shrink-0">
+                <Printer className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-black uppercase text-blue-300 tracking-wider">
+                    Format Pelaporan Resmi (A4)
+                  </span>
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.2 rounded-full border border-emerald-500/30">
+                    Singkat, Padat & Jelas
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300 mt-0.5">
+                  Siap dicetak untuk pelaporan ke Dinas Pendidikan, Pengawas, maupun Kepala Sekolah lengkap dengan KOP dinas dan lembar tanda tangan.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setActiveModule('cetak')}
+              className="btn-3d btn-3d-blue text-white text-xs font-bold px-4 py-2.5 rounded-xl shrink-0 flex items-center gap-2 shadow-xs cursor-pointer"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Lihat Format Cetak Pelaporan</span>
+            </button>
+          </div>
+        )}
 
         {/* ======================================================== */}
         {/* MODULE 1: DATA GURU & PEGAWAI (SIMPEG) */}
