@@ -20,6 +20,8 @@ import { SiswaFormModal } from './components/SiswaFormModal';
 import { SiswaFotoModal } from './components/SiswaFotoModal';
 import { GoogleFormsManagerModal } from './components/GoogleFormsManagerModal';
 import { GoogleSheetsManagerModal } from './components/GoogleSheetsManagerModal';
+import { GoogleDocsManagerModal } from './components/GoogleDocsManagerModal';
+import { BackupRestoreModal } from './components/BackupRestoreModal';
 import { HtmlAddressBar } from './components/HtmlAddressBar';
 import { WebAddressModal } from './components/WebAddressModal';
 import { CetakCenter } from './components/CetakCenter';
@@ -125,11 +127,52 @@ export default function App() {
   // Google Sheets Modal State
   const [isGoogleSheetsModalOpen, setIsGoogleSheetsModalOpen] = useState(false);
 
+  // Google Docs Modal State
+  const [isGoogleDocsModalOpen, setIsGoogleDocsModalOpen] = useState(false);
+
+  // Backup & Restore Modal State
+  const [isBackupRestoreModalOpen, setIsBackupRestoreModalOpen] = useState(false);
+
   // Web Address List Modal State
   const [isWebAddressModalOpen, setIsWebAddressModalOpen] = useState(false);
 
   // Toast State
   const [toast, setToast] = useState<ToastMessage | null>(null);
+
+  // Handle Restore Data from BackupRestoreModal
+  const handleRestoreData = (
+    restored: {
+      pegawai?: Pegawai[];
+      siswa?: Siswa[];
+      kop?: KopSekolah;
+    },
+    _mode: 'replace' | 'merge'
+  ) => {
+    if (restored.pegawai) {
+      setPegawaiList(restored.pegawai);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(restored.pegawai));
+      } catch (e) {
+        console.error('Failed to save restored pegawai data', e);
+      }
+    }
+    if (restored.siswa) {
+      setSiswaList(restored.siswa);
+      try {
+        localStorage.setItem(SISWA_STORAGE_KEY, JSON.stringify(restored.siswa));
+      } catch (e) {
+        console.error('Failed to save restored siswa data', e);
+      }
+    }
+    if (restored.kop) {
+      setKopSekolah(restored.kop);
+      try {
+        localStorage.setItem(KOP_STORAGE_KEY, JSON.stringify(restored.kop));
+      } catch (e) {
+        console.error('Failed to save restored kop data', e);
+      }
+    }
+  };
 
   // Synchronize Pegawai with LocalStorage
   useEffect(() => {
@@ -455,6 +498,8 @@ export default function App() {
         onSelectModule={handleNavigate}
         onOpenGoogleForms={() => setIsGoogleFormsModalOpen(true)}
         onOpenGoogleSheets={() => setIsGoogleSheetsModalOpen(true)}
+        onOpenGoogleDocs={() => setIsGoogleDocsModalOpen(true)}
+        onOpenBackupRestore={() => setIsBackupRestoreModalOpen(true)}
         siswaCount={siswaList.length}
         totalCount={pegawaiList.length}
         kop={kopSekolah}
@@ -609,6 +654,9 @@ export default function App() {
             kop={kopSekolah}
             onViewSiswaDetail={(siswa) => setDetailSiswa(siswa)}
             onViewPegawaiDetail={(pegawai) => setDetailPegawai(pegawai)}
+            onOpenGoogleDocs={() => setIsGoogleDocsModalOpen(true)}
+            onOpenBackupRestore={() => setIsBackupRestoreModalOpen(true)}
+            onShowToast={showToast}
           />
         )}
       </main>
@@ -739,6 +787,26 @@ export default function App() {
         kop={kopSekolah}
       />
 
+      {/* Modal Google Docs Manager */}
+      <GoogleDocsManagerModal
+        isOpen={isGoogleDocsModalOpen}
+        onClose={() => setIsGoogleDocsModalOpen(false)}
+        pegawaiList={pegawaiList}
+        siswaList={siswaList}
+        kop={kopSekolah}
+      />
+
+      {/* Modal Backup & Restore Keseluruhan */}
+      <BackupRestoreModal
+        isOpen={isBackupRestoreModalOpen}
+        onClose={() => setIsBackupRestoreModalOpen(false)}
+        pegawaiList={pegawaiList}
+        siswaList={siswaList}
+        kop={kopSekolah}
+        onRestoreData={handleRestoreData}
+        onShowToast={(msg, type) => showToast(msg, type)}
+      />
+
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200/80 py-5 text-center text-xs text-slate-500 mt-auto">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
@@ -746,6 +814,14 @@ export default function App() {
             &copy; 2026 <strong>SIMPEG & KESISWAAN SMAN</strong> — Sistem Informasi Terpadu SMA Negeri
           </p>
           <div className="flex items-center gap-3 text-[11px] text-slate-500">
+            <button
+              type="button"
+              onClick={() => setIsBackupRestoreModalOpen(true)}
+              className="text-indigo-600 hover:text-indigo-800 font-bold underline cursor-pointer flex items-center gap-1"
+            >
+              💾 Backup & Restore Data
+            </button>
+            <span>&bull;</span>
             <button
               type="button"
               onClick={() => setIsWebAddressModalOpen(true)}

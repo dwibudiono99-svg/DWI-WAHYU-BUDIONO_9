@@ -16,7 +16,8 @@ import {
   ShieldCheck,
   ChevronDown,
   Layers,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Database
 } from 'lucide-react';
 import { Siswa, Pegawai, KopSekolah } from '../types';
 import {
@@ -25,6 +26,7 @@ import {
   generateLaporanEksekutifHTML,
   downloadHTMLFile
 } from '../utils/htmlExporter';
+import { ExcelWorksheetViewer } from './ExcelWorksheetViewer';
 
 interface CetakCenterProps {
   siswaList: Siswa[];
@@ -32,6 +34,9 @@ interface CetakCenterProps {
   kop: KopSekolah;
   onViewSiswaDetail: (siswa: Siswa) => void;
   onViewPegawaiDetail: (pegawai: Pegawai) => void;
+  onOpenGoogleDocs?: () => void;
+  onOpenBackupRestore?: () => void;
+  onShowToast?: (title: string, message: string, type?: 'success' | 'info' | 'warning' | 'error') => void;
 }
 
 export const CetakCenter: React.FC<CetakCenterProps> = ({
@@ -39,14 +44,18 @@ export const CetakCenter: React.FC<CetakCenterProps> = ({
   pegawaiList,
   kop,
   onViewSiswaDetail,
-  onViewPegawaiDetail
+  onViewPegawaiDetail,
+  onOpenGoogleDocs,
+  onOpenBackupRestore,
+  onShowToast = () => {}
 }) => {
   // Document Type:
   // 'eksekutif' = Laporan Eksekutif Pelaporan (1-2 lembar ringkas, padat & resmi)
   // 'duk' = Daftar Urut Kepegawaian (SIMPEG)
   // 'siswa' = Buku Induk Kesiswaan & Dapodik
   // 'kartu' = Lembar Cetak Kartu Pelajar & KTA
-  const [selectedDoc, setSelectedDoc] = useState<'eksekutif' | 'duk' | 'siswa' | 'kartu'>('eksekutif');
+  // 'worksheet' = Lembar Kerja Excel / CSV Worksheet Table
+  const [selectedDoc, setSelectedDoc] = useState<'eksekutif' | 'duk' | 'siswa' | 'kartu' | 'worksheet'>('eksekutif');
 
   // Customization options for reporting
   const [nomorSurat, setNomorSurat] = useState('421.3 / 118 / 101.6.1 / 2026');
@@ -147,6 +156,30 @@ export const CetakCenter: React.FC<CetakCenterProps> = ({
             <span>Unduh File .html</span>
           </button>
 
+          {onOpenGoogleDocs && (
+            <button
+              type="button"
+              onClick={onOpenGoogleDocs}
+              className="btn-3d btn-3d-indigo text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer shadow-xs"
+              title="Buka atau buat laporan kedinasan resmi langsung di Google Docs"
+            >
+              <FileText className="w-4 h-4 text-indigo-200" />
+              <span>Ekspor ke Google Docs</span>
+            </button>
+          )}
+
+          {onOpenBackupRestore && (
+            <button
+              type="button"
+              onClick={onOpenBackupRestore}
+              className="btn-3d btn-3d-dark text-slate-100 text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer shadow-xs border border-slate-700"
+              title="Cadangkan seluruh database & KOP surat atau pulihkan dari file backup"
+            >
+              <Database className="w-4 h-4 text-indigo-400" />
+              <span>Backup & Restore</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={handlePrint}
@@ -230,7 +263,7 @@ export const CetakCenter: React.FC<CetakCenterProps> = ({
       )}
 
       {/* Document Category Selector Tabs (Screen Only) */}
-      <div className="no-print grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="no-print grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         <button
           type="button"
           onClick={() => setSelectedDoc('eksekutif')}
@@ -307,12 +340,37 @@ export const CetakCenter: React.FC<CetakCenterProps> = ({
             Lembar kisi kartu tanda pengenal berpas foto dinas siap dipotong / laminasi.
           </p>
         </button>
+
+        <button
+          type="button"
+          onClick={() => setSelectedDoc('worksheet')}
+          className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+            selectedDoc === 'worksheet'
+              ? 'bg-teal-50/90 border-teal-600 shadow-md ring-2 ring-teal-500/20'
+              : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+          }`}
+        >
+          <div className="w-10 h-10 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-bold mb-2 shadow-xs">
+            <FileSpreadsheet className="w-5 h-5" />
+          </div>
+          <h3 className="font-black text-slate-900 text-sm">Lembar Kerja Excel / CSV</h3>
+          <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+            Worksheet interaktif, ekspor .xls terformat, CSV ber-BOM, & salin siap tempel.
+          </p>
+        </button>
       </div>
 
       {/* ========================================================================= */}
-      {/* PRINTABLE DOCUMENT SHEET (A4 / FOLIO FORMAL REPORT) */}
-      {/* Visible on screen with realistic shadow, and exclusively printed on Ctrl+P */}
+      {/* VIEW SELECTION: WORKSHEET VIEW OR PRINTABLE DOCUMENT SHEET */}
       {/* ========================================================================= */}
+      {selectedDoc === 'worksheet' ? (
+        <ExcelWorksheetViewer
+          pegawaiList={pegawaiList}
+          siswaList={siswaList}
+          kop={kop}
+          onShowToast={onShowToast}
+        />
+      ) : (
       <div className="printable-document-container max-w-4xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-300/80 p-8 sm:p-12 text-slate-900">
         {/* KOP SURAT DINAS RESMI */}
         <div className="border-b-[3px] border-b-black pb-3 mb-6 flex items-center justify-between text-center relative">
@@ -765,6 +823,7 @@ export const CetakCenter: React.FC<CetakCenterProps> = ({
           <span className="font-mono">Dokumen Sah Digital Kedinasan</span>
         </div>
       </div>
+      )}
     </div>
   );
 };

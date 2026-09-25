@@ -13,8 +13,10 @@ import firebaseConfig from '../../firebase-applet-config.json';
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 
-// Provider with required Google Sheets, Forms, and Drive scopes
+// Provider with required Google Docs, Sheets, Forms, and Drive scopes
 const provider = new GoogleAuthProvider();
+provider.addScope('https://www.googleapis.com/auth/documents');
+provider.addScope('https://www.googleapis.com/auth/documents.readonly');
 provider.addScope('https://www.googleapis.com/auth/spreadsheets');
 provider.addScope('https://www.googleapis.com/auth/spreadsheets.readonly');
 provider.addScope('https://www.googleapis.com/auth/drive');

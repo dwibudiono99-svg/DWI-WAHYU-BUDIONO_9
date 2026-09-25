@@ -4,13 +4,15 @@ import {
   GraduationCap,
   Upload,
   FileSpreadsheet,
+  FileText,
   UserPlus,
   FileDown,
   BookOpen,
   Building2,
   Edit3,
   Sparkles,
-  Printer
+  Printer,
+  Database
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -27,6 +29,8 @@ interface HeaderProps {
   onSelectModule: (module: 'pegawai' | 'siswa' | 'cetak') => void;
   onOpenGoogleForms: () => void;
   onOpenGoogleSheets: () => void;
+  onOpenGoogleDocs?: () => void;
+  onOpenBackupRestore?: () => void;
   siswaCount: number;
 }
 
@@ -44,6 +48,8 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectModule,
   onOpenGoogleForms,
   onOpenGoogleSheets,
+  onOpenGoogleDocs,
+  onOpenBackupRestore,
   siswaCount
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -168,6 +174,34 @@ export const Header: React.FC<HeaderProps> = ({
             <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-200" />
             <span>Google Sheets</span>
           </button>
+
+          {/* Google Docs Trigger Button */}
+          {onOpenGoogleDocs && (
+            <button
+              id="btn-open-google-docs"
+              type="button"
+              onClick={onOpenGoogleDocs}
+              title="Kelola & Buat Laporan Resmi di Google Docs"
+              className="btn-3d btn-3d-blue text-blue-50 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5 text-blue-200" />
+              <span>Google Docs</span>
+            </button>
+          )}
+
+          {/* Backup & Restore Trigger Button */}
+          {onOpenBackupRestore && (
+            <button
+              id="btn-open-backup-restore"
+              type="button"
+              onClick={onOpenBackupRestore}
+              title="Backup Keseluruhan Data (Pegawai, Siswa, KOP) & Restore Data"
+              className="btn-3d btn-3d-indigo text-indigo-50 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer border border-indigo-400/40"
+            >
+              <Database className="w-3.5 h-3.5 text-indigo-200" />
+              <span>Backup & Restore</span>
+            </button>
+          )}
         </div>
 
         {/* Action Controls */}
